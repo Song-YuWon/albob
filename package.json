@@ -1,17 +1,26 @@
 {
-  "name": "albob-scaffold-tmp",
+  "name": "albob",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed:ingredients": "tsx --env-file=.env scripts/seed-ingredients.ts",
+    "seed:products": "tsx --env-file=.env scripts/seed-products.ts"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.7.1",
+    "@supabase/supabase-js": "^2.112.0",
+    "jose": "^6.2.8",
     "next": "16.2.12",
+    "pretendard": "^1.3.9",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "react-hook-form": "^7.84.0",
+    "server-only": "^0.0.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -21,6 +30,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
     "tailwindcss": "^4",
+    "tsx": "^4.23.5",
     "typescript": "^5"
   }
 }

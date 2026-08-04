@@ -28,7 +28,7 @@ app/
     ingredients/            search/route.ts, request/route.ts
     reviews/                route.ts
     auth/login/              route.ts
-  middleware.ts            # 세션 쿠키 게이트, 없으면 /login으로
+proxy.ts                    # 세션 쿠키 게이트, 없으면 /login으로 (Next.js 16부터 middleware.ts → proxy.ts로 이름 변경, Node.js 런타임에서 실행)
 
 components/                # 여러 화면에서 재사용하는 순수 UI 컴포넌트
   ui/                      # shadcn/ui
