@@ -2,7 +2,7 @@
 
 # 알밥 — 개발 규칙
 
-반려동물 사료 성분 등록·검색 서비스. 전체 기획은 [기획서_v1.6.md](기획서_v1.6.md) 참고, 화면별 상세 디자인 명세는 [design-handoff/design_handoff_albob_app/README.md](design-handoff/design_handoff_albob_app/README.md) 참고. 이 문서는 코드를 작성할 때 지켜야 할 규칙만 담는다.
+반려동물 사료 성분 등록·검색 서비스. 전체 기획은 [기획서_v1.6.md](docs/기획서_v1.6.md) 참고, 화면별 상세 디자인 명세는 [design-handoff/design_handoff_albob_app/README.md](design-handoff/design_handoff_albob_app/README.md) 참고. 이 문서는 코드를 작성할 때 지켜야 할 규칙만 담는다.
 
 ## 협업 방식
 
