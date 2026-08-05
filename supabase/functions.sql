@@ -28,3 +28,27 @@ as $$
   order by similarity desc
   limit match_limit;
 $$;
+
+-- 성분 태그 검색 (기획서 v1.6 9.6) — 부분 일치 + 트라이그램 유사도를 함께 사용해
+-- 오타·부분 입력 둘 다 대응한다. approved/pending 상태 구분 없이 후보에 포함한다
+-- (pending은 클라이언트에서 "검토중" 배지로 표시).
+create or replace function search_ingredients(keyword text, match_limit int default 10)
+returns table (
+  id uuid,
+  name text,
+  status text,
+  similarity real
+)
+language sql
+stable
+as $$
+  select
+    i.id,
+    i.name,
+    i.status,
+    similarity(i.name, keyword) as similarity
+  from ingredients i
+  where i.name ilike '%' || keyword || '%' or similarity(i.name, keyword) > 0.1
+  order by similarity desc, i.name asc
+  limit match_limit;
+$$;

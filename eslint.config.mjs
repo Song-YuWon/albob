@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // 디자인 참고용 정적 목업 — 구현에 쓰지 않는 파일 (design-handoff/README.md 참고)
+    "design-handoff/**",
   ]),
 ]);
 

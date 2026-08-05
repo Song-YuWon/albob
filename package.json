@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "seed:ingredients": "tsx --env-file=.env scripts/seed-ingredients.ts",
-    "seed:products": "tsx --env-file=.env scripts/seed-products.ts"
+    "seed:products": "tsx --env-file=.env scripts/seed-products.ts",
+    "setup:storage": "tsx --env-file=.env scripts/setup-storage.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.7.1",

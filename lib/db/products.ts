@@ -61,3 +61,44 @@ export async function findSimilarProducts(
     }),
   );
 }
+
+export interface CreateProductParams {
+  name: string;
+  brand: string;
+  frontPhotoUrl: string;
+  backPhotoUrl: string;
+  ingredientIds: string[];
+  createdBy: string;
+}
+
+// 최초 등록 — created_by/updated_by를 둘 다 등록자로 채운다. 이후 다른 테스터가 고치면
+// updated_by만 바뀌고 created_by는 최초 등록자로 그대로 남는다 (3.5).
+export async function createProduct(
+  supabase: SupabaseClient,
+  params: CreateProductParams,
+): Promise<string> {
+  const { data, error } = await supabase
+    .from("products")
+    .insert({
+      name: params.name,
+      brand: params.brand,
+      front_photo_url: params.frontPhotoUrl,
+      back_photo_url: params.backPhotoUrl,
+      created_by: params.createdBy,
+      updated_by: params.createdBy,
+    })
+    .select("id")
+    .single();
+
+  if (error) throw error;
+  const productId = data.id as string;
+
+  if (params.ingredientIds.length > 0) {
+    const { error: linkError } = await supabase
+      .from("product_ingredients")
+      .insert(params.ingredientIds.map((ingredientId) => ({ product_id: productId, ingredient_id: ingredientId })));
+    if (linkError) throw linkError;
+  }
+
+  return productId;
+}
