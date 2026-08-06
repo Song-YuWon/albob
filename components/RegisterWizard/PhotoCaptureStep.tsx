@@ -8,6 +8,7 @@ interface PhotoCaptureStepProps {
   photoStepLabel: string; // "1 / 2", "2 / 2" — 앞/뒤 두 장 중 몇 번째인지 (도트 단계와는 별개)
   previousThumbnailUrl?: string | null;
   onCaptured: (file: File) => void;
+  onEditPreviousPhoto?: () => void;
   isUploading: boolean;
   errorMessage: string | null;
 }
@@ -19,6 +20,7 @@ export function PhotoCaptureStep({
   photoStepLabel,
   previousThumbnailUrl,
   onCaptured,
+  onEditPreviousPhoto,
   isUploading,
   errorMessage,
 }: PhotoCaptureStepProps) {
@@ -48,7 +50,11 @@ export function PhotoCaptureStep({
       </span>
 
       {previousThumbnailUrl && (
-        <div className="flex items-center gap-2 rounded-full border border-primary bg-surface px-3 py-1.5">
+        <button
+          type="button"
+          onClick={onEditPreviousPhoto}
+          className="flex items-center gap-2 rounded-full border border-primary bg-surface px-3 py-1.5"
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={previousThumbnailUrl}
@@ -56,7 +62,16 @@ export function PhotoCaptureStep({
             className="h-[38px] w-[38px] rounded-full object-cover"
           />
           <span className="font-body text-xs text-ink-soft">{MESSAGES.registration.frontCaptureDone}</span>
-        </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M4 20L4.6 16.4L16 5C16.5523 4.44772 17.4477 4.44772 18 5L19 6C19.5523 6.55228 19.5523 7.44772 19 8L7.6 19.4L4 20Z"
+              stroke="var(--ink-soft)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
       )}
 
       {/* 카메라를 직접 여는 대신 갤러리에서 사진을 선택하게 한다 — 촬영 직후 카메라 앱이 뜬 동안

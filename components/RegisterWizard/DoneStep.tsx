@@ -23,8 +23,11 @@ export function DoneStep({ productId, testerId }: DoneStepProps) {
       <p className="font-display text-lg text-ink">{MESSAGES.registration.doneTitle}</p>
       <p className="font-body text-sm text-ink-soft">{MESSAGES.registration.firstRegistrant(testerId)}</p>
 
+      {/* replace: 히스토리에 /register를 남기지 않아, 상세 화면에서 뒤로가기를 눌러도
+          빈 등록 위저드로 돌아가지 않고 등록 이전 화면으로 곧장 돌아간다 */}
       <Link
         href={`/products/${productId}`}
+        replace
         className="mt-4 w-full max-w-xs rounded-2xl bg-primary py-4 text-center font-body text-sm font-bold text-white shadow-[0_10px_24px_-10px_var(--accent)]"
       >
         {MESSAGES.registration.viewDetail}

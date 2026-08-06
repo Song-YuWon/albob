@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Logo } from "@/components/Logo/Logo";
 import { ProgressDots } from "./ProgressDots";
 import { PhotoCaptureStep } from "./PhotoCaptureStep";
@@ -21,9 +22,11 @@ export function RegisterWizard({ initialName, testerId }: RegisterWizardProps) {
 
   return (
     <div className="flex min-h-full flex-1 flex-col bg-bg">
-      <header className="flex items-center justify-center gap-2 pt-6">
-        <Logo size="compact" />
-        <p className="font-display text-[19px] font-bold text-ink">알밥</p>
+      <header className="flex items-center justify-center pt-6">
+        <Link href="/" onClick={wizard.handleExitToHome} className="flex items-center gap-2" aria-label="홈으로">
+          <Logo size="compact" />
+          <p className="font-display text-[19px] font-bold text-ink">알밥</p>
+        </Link>
       </header>
 
       {wizard.step !== "done" && <ProgressDots step={wizard.step} />}
@@ -44,6 +47,7 @@ export function RegisterWizard({ initialName, testerId }: RegisterWizardProps) {
           photoStepLabel="2 / 2"
           previousThumbnailUrl={wizard.frontPhotoUrl}
           onCaptured={wizard.handleBackCaptured}
+          onEditPreviousPhoto={wizard.handleEditFrontPhoto}
           isUploading={wizard.isUploadingPhoto}
           errorMessage={wizard.photoError}
         />

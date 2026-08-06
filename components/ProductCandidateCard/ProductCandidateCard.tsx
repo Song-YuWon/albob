@@ -8,7 +8,12 @@ interface ProductCandidateCardProps {
 export function ProductCandidateCard({ product }: ProductCandidateCardProps) {
   return (
     <Link href={`/products/${product.id}`} className="flex w-[108px] shrink-0 flex-col gap-2">
-      <div className="h-[60px] w-full rounded-xl bg-surface-2" />
+      {product.frontPhotoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={product.frontPhotoUrl} alt="" className="h-[60px] w-full rounded-xl bg-surface-2 object-cover" />
+      ) : (
+        <div className="h-[60px] w-full rounded-xl bg-surface-2" />
+      )}
       <div>
         <p className="truncate font-body text-xs font-bold text-ink">{product.name}</p>
         <p className="truncate font-body text-[10.5px] text-ink-soft">{product.brand}</p>

@@ -24,8 +24,17 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const candidates = matches.length === 0 ? await findSimilarProducts(supabase, keyword) : [];
 
   return (
-    <div className="flex min-h-full flex-1 flex-col gap-6 bg-bg px-6 pb-8 pt-6">
-      <SearchBar defaultValue={keyword} />
+    <div className={`flex min-h-full flex-1 flex-col gap-6 bg-bg px-6 pt-6 ${matches.length > 0 ? "pb-28" : "pb-8"}`}>
+      <div className="flex items-center gap-3">
+        <Link href="/" aria-label="홈으로">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M15 6L9 12L15 18" stroke="var(--ink)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </Link>
+        <div className="min-w-0 flex-1">
+          <SearchBar defaultValue={keyword} />
+        </div>
+      </div>
 
       {matches.length > 0 ? (
         <>
@@ -46,7 +55,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
 function RegisterInsteadLink({ keyword }: { keyword: string }) {
   return (
-    <p className="text-center font-body text-xs text-ink-soft">
+    <p className="fixed inset-x-0 bottom-0 border-t border-line bg-surface px-6 py-4 text-center font-body text-xs text-ink-soft">
       찾는 제품이 아닌가요?{" "}
       <Link href={`/register?name=${encodeURIComponent(keyword)}`} className="font-bold text-ink underline">
         직접 등록하기

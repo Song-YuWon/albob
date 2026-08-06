@@ -1,15 +1,10 @@
 import { NextResponse } from "next/server";
 import { productPhotoUploadSchema } from "@/lib/validation/upload";
 import { uploadDraftProductPhoto } from "@/lib/db/productPhotos";
+import { compressProductPhoto } from "@/lib/server/compressPhoto";
 import { createSupabaseAdminClient } from "@/lib/server/supabase-admin";
 import { API_ERROR_CODE, ALLOWED_PHOTO_MIME_TYPES, MAX_PHOTO_SIZE_BYTES } from "@/lib/constants/codes";
 import { MESSAGES } from "@/lib/constants/messages";
-
-const EXTENSION_BY_MIME: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-};
 
 export async function POST(request: Request) {
   const formData = await request.formData();
@@ -51,12 +46,22 @@ export async function POST(request: Request) {
     );
   }
 
+  let compressed;
+  try {
+    compressed = await compressProductPhoto(file);
+  } catch {
+    return NextResponse.json(
+      { code: API_ERROR_CODE.VALIDATION_ERROR, message: MESSAGES.upload.processingFailed },
+      { status: 400 },
+    );
+  }
+
   const supabase = createSupabaseAdminClient();
   const url = await uploadDraftProductPhoto(supabase, {
     draftId: parsed.data.draftId,
     side: parsed.data.side,
-    file,
-    extension: EXTENSION_BY_MIME[file.type],
+    file: new Blob([new Uint8Array(compressed.buffer)], { type: compressed.contentType }),
+    extension: "jpg",
   });
 
   return NextResponse.json({ url });

@@ -10,10 +10,12 @@ export function SearchBar({ defaultValue }: SearchBarProps) {
       method="GET"
       className="flex w-full items-center gap-2 rounded-[18px] border-[1.5px] border-line bg-surface px-4 py-3 shadow-sm"
     >
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <circle cx="11" cy="11" r="7" stroke="var(--ink-soft)" strokeWidth="2.2" />
-        <path d="M20 20L16.5 16.5" stroke="var(--ink-soft)" strokeWidth="2.2" strokeLinecap="round" />
-      </svg>
+      <button type="submit" aria-label="검색">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" stroke="var(--ink-soft)" strokeWidth="2.2" />
+          <path d="M20 20L16.5 16.5" stroke="var(--ink-soft)" strokeWidth="2.2" strokeLinecap="round" />
+        </svg>
+      </button>
       <input
         type="search"
         name="q"

@@ -52,3 +52,12 @@ as $$
   order by similarity desc, i.name asc
   limit match_limit;
 $$;
+
+-- 제품 상세 조회수 증가 (기획서 v1.6 3.2) — 읽고 쓰는 두 단계로 하면 동시 조회 시 값이
+-- 어긋날 수 있어, DB 함수 안에서 원자적으로 처리한다.
+create or replace function increment_product_view_count(target_id uuid)
+returns void
+language sql
+as $$
+  update products set view_count = view_count + 1 where id = target_id;
+$$;

@@ -51,6 +51,26 @@ export const MESSAGES = {
     firstRegistrant: (testerId: string) => `${testerId}님이 첫 등록자예요`,
     viewDetail: "상세 페이지 보기 →",
   },
+  productDetail: {
+    registeredBy: (id: string) => `등록: ${id}`,
+    lastUpdated: (date: string, id: string) => `최종 수정: ${date} (${id})`,
+    viewsAndEdits: (views: number, edits: number) => `조회 ${views} · 수정 ${edits}회`,
+    frontPhotoLabel: "앞면",
+    backPhotoLabel: "뒷면",
+    ingredientsLabel: "성분",
+    reviewsLabel: "리뷰",
+    noReviewsYet: "아직 리뷰가 없어요",
+    editButton: "수정하기",
+    disclaimer:
+      "이 정보는 사용자들이 함께 등록·수정한 내용으로, 성분의 안전성이 검증된 것은 아니에요. 반려동물 건강에 관한 결정은 수의사와 상의해주세요.",
+    notFoundTitle: "제품을 찾을 수 없어요",
+  },
+  productEdit: {
+    sharedDataNotice: "공유 데이터입니다 · 등록자가 아니어도 수정할 수 있어요",
+    lastEdited: (date: string, id: string) => `마지막 수정: ${date} · ${id}`,
+    submitButton: "수정 완료",
+    submitting: "수정하는 중...",
+  },
   tagSearch: {
     title: "어떤 성분인가요?",
     placeholder: "성분 이름을 검색해보세요",

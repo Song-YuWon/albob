@@ -117,6 +117,15 @@ export function useRegisterWizard(initialName: string) {
     setStep("photo-back");
   };
 
+  const handleEditFrontPhoto = () => {
+    setPhotoError(null);
+    setStep("photo-front");
+  };
+
+  const handleExitToHome = () => {
+    clearPersistedWizardState();
+  };
+
   const handleContinueWithoutTags = () => {
     setTags([]);
     setStep("tags");
@@ -188,6 +197,8 @@ export function useRegisterWizard(initialName: string) {
     handleFrontCaptured,
     handleBackCaptured,
     handleRetake,
+    handleEditFrontPhoto,
+    handleExitToHome,
     handleContinueWithoutTags,
     handleTagClick,
     handleAddTag,
