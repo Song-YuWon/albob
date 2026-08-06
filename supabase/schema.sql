@@ -53,7 +53,7 @@ create table product_edit_logs (
 
 create index idx_product_edit_logs_product_id on product_edit_logs(product_id);
 
--- 리뷰 (개인 콘텐츠 — 작성자 본인만 수정/삭제)
+-- 리뷰 (개인 콘텐츠 — 작성자 본인만 수정/삭제, 한 사람당 제품 하나에 리뷰 하나)
 create table reviews (
   id uuid primary key default gen_random_uuid(),
   product_id uuid not null references products(id) on delete cascade,
@@ -61,7 +61,8 @@ create table reviews (
   rating smallint not null check (rating between 1 and 5),
   comment text not null,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  unique (product_id, user_id)
 );
 
 create index idx_reviews_product_id on reviews(product_id);

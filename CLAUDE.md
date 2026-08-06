@@ -26,7 +26,7 @@ app/
   api/
     products/              route.ts, [id]/route.ts
     ingredients/            search/route.ts, request/route.ts
-    reviews/                route.ts
+    reviews/                route.ts, [id]/route.ts
     auth/login/              route.ts
 proxy.ts                    # 세션 쿠키 게이트, 없으면 /login으로 (Next.js 16부터 middleware.ts → proxy.ts로 이름 변경, Node.js 런타임에서 실행)
 

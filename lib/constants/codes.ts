@@ -7,6 +7,8 @@ export const API_ERROR_CODE = {
   VALIDATION_ERROR: "VALIDATION_ERROR",
   INVALID_CREDENTIALS: "INVALID_CREDENTIALS",
   UNAUTHORIZED: "UNAUTHORIZED",
+  FORBIDDEN: "FORBIDDEN",
+  NOT_FOUND: "NOT_FOUND",
 } as const;
 
 // 성분 마스터 상태 — approved: 운영자 사전 등록 / pending: 사용자 "추가 요청"으로 생성된 미승인 성분
@@ -35,3 +37,8 @@ export const TAG_STATUS = {
   UNRESOLVED: "unresolved",
   REQUESTED: "requested",
 } as const;
+
+// 리뷰 별점 범위(5점 만점)와 코멘트 길이 상한
+export const REVIEW_RATING_MIN = 1;
+export const REVIEW_RATING_MAX = 5;
+export const REVIEW_COMMENT_MAX_LENGTH = 1000;

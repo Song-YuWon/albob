@@ -157,7 +157,6 @@ export interface ProductDetail {
   updatedAt: string;
   viewCount: number;
   editCount: number;
-  reviewCount: number;
   ingredients: { id: string; name: string; status: "approved" | "pending" }[];
 }
 
@@ -173,7 +172,6 @@ interface ProductDetailRow {
   updated_at: string;
   view_count: number;
   product_edit_logs: { count: number }[] | null;
-  reviews: { count: number }[] | null;
   product_ingredients: { ingredients: { id: string; name: string; status: string } | null }[] | null;
 }
 
@@ -186,7 +184,7 @@ export async function getProductDetail(
   const { data, error } = await supabase
     .from("products")
     .select(
-      "id, name, brand, front_photo_url, back_photo_url, created_by, created_at, updated_by, updated_at, view_count, product_edit_logs(count), reviews(count), product_ingredients(ingredients(id, name, status))",
+      "id, name, brand, front_photo_url, back_photo_url, created_by, created_at, updated_by, updated_at, view_count, product_edit_logs(count), product_ingredients(ingredients(id, name, status))",
     )
     .eq("id", productId)
     .maybeSingle();
@@ -208,7 +206,6 @@ export async function getProductDetail(
     updatedAt: row.updated_at,
     viewCount: row.view_count,
     editCount: row.product_edit_logs?.[0]?.count ?? 0,
-    reviewCount: row.reviews?.[0]?.count ?? 0,
     ingredients: (row.product_ingredients ?? [])
       .map((link) => link.ingredients)
       .filter((ingredient): ingredient is { id: string; name: string; status: string } => Boolean(ingredient))
