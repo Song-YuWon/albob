@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { MESSAGES } from "@/lib/constants/messages";
 
 interface OcrStepProps {
@@ -8,13 +9,25 @@ interface OcrStepProps {
   onContinueWithoutTags: () => void;
 }
 
+const SLOW_HINT_DELAY_MS = 8000;
+
 export function OcrStep({ status, onRetake, onContinueWithoutTags }: OcrStepProps) {
+  const [showSlowHint, setShowSlowHint] = useState(false);
+
+  useEffect(() => {
+    if (status !== "processing") return;
+    const timer = setTimeout(() => setShowSlowHint(true), SLOW_HINT_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [status]);
+
   if (status === "processing") {
+    const hint = showSlowHint ? MESSAGES.registration.uploadingSlowHint : MESSAGES.registration.ocrProcessingHint;
+
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
         <div className="h-16 w-16 animate-spin rounded-full border-4 border-line border-t-primary" />
         <p className="font-body text-sm text-ink">{MESSAGES.registration.ocrProcessingTitle}</p>
-        <p className="font-body text-xs text-ink-soft">{MESSAGES.registration.ocrProcessingHint}</p>
+        <p className="font-body text-xs text-ink-soft">{hint}</p>
       </div>
     );
   }

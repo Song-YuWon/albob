@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { ocrRequestSchema } from "@/lib/validation/registration";
-import { runMockOcr } from "@/lib/server/ocr";
+import { runOcr } from "@/lib/server/ocr";
 import { parseIngredientText } from "@/lib/utils/parseIngredientText";
 import { matchIngredientsByExactName } from "@/lib/db/ingredients";
 import { createSupabaseAdminClient } from "@/lib/server/supabase-admin";
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const ocrResult = await runMockOcr();
+  const ocrResult = await runOcr(parsed.data.backPhotoUrl);
   if (ocrResult.status === "failed") {
     return NextResponse.json({ ocrStatus: "failed", tags: [] });
   }
