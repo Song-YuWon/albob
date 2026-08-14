@@ -31,7 +31,8 @@ export async function POST(request: Request) {
   let original: Blob;
   try {
     original = await downloadDraftProductPhotoOriginal(supabase, parsed.data);
-  } catch {
+  } catch (error) {
+    console.error("원본 사진 다운로드 실패:", error);
     return NextResponse.json(
       { code: API_ERROR_CODE.VALIDATION_ERROR, message: MESSAGES.upload.invalidRequest },
       { status: 400 },
@@ -41,7 +42,8 @@ export async function POST(request: Request) {
   let compressed;
   try {
     compressed = await compressProductPhoto(original);
-  } catch {
+  } catch (error) {
+    console.error("사진 압축 실패:", error);
     return NextResponse.json(
       { code: API_ERROR_CODE.VALIDATION_ERROR, message: MESSAGES.upload.processingFailed },
       { status: 400 },
