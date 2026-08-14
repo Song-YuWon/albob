@@ -1,21 +1,40 @@
 // 등록 위저드(클라이언트)에서 쓰는 fetch 래퍼 모음 — 각 등록 API 호출을 한 곳에 모아
 // 컴포넌트들이 fetch/에러 처리 코드를 중복해서 갖지 않게 한다.
 import { fetchJson } from "./fetchJson";
+import { createSupabaseBrowserClient } from "./supabaseClient";
+import { PRODUCT_PHOTOS_BUCKET_ID } from "@/lib/constants/codes";
 
+// Vercel Functions는 요청 본문이 4.5MB로 제한돼 있어(사진은 최대 20MB) 서버를 거쳐 올릴 수
+// 없다 — 서버에서 서명된 업로드 URL만 발급받고, 실제 파일 바이트는 브라우저에서 Supabase
+// Storage로 직접 올린다. 압축(용량 절감)은 여전히 서버 몫이라, 직접 올린 원본을 서버가
+// 내려받아 압축한 뒤 최종 자리에 다시 올리는 "마무리" 요청을 한 번 더 보낸다.
 export async function uploadProductPhoto(params: {
   draftId: string;
   side: "front" | "back";
   file: File;
 }): Promise<string> {
-  const formData = new FormData();
-  formData.append("draftId", params.draftId);
-  formData.append("side", params.side);
-  formData.append("file", params.file);
+  const { path, token } = await fetchJson<{ path: string; token: string }>(
+    "/api/uploads/product-photo/sign",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ draftId: params.draftId, side: params.side }),
+    },
+    "사진 업로드 준비에 실패했어요",
+  );
+
+  const supabase = createSupabaseBrowserClient();
+  const { error } = await supabase.storage.from(PRODUCT_PHOTOS_BUCKET_ID).uploadToSignedUrl(path, token, params.file);
+  if (error) throw new Error("사진 업로드에 실패했어요");
 
   const body = await fetchJson<{ url: string }>(
-    "/api/uploads/product-photo",
-    { method: "POST", body: formData },
-    "사진 업로드에 실패했어요",
+    "/api/uploads/product-photo/finalize",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ draftId: params.draftId, side: params.side }),
+    },
+    "사진 처리에 실패했어요",
   );
   return body.url;
 }

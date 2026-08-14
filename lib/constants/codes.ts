@@ -23,6 +23,9 @@ export const PRODUCT_PHOTO_SIDE = {
   BACK: "back",
 } as const;
 
+// 클라이언트(서명 URL로 직접 업로드)와 서버(관리자 클라이언트) 양쪽에서 같은 버킷을 가리켜야 한다
+export const PRODUCT_PHOTOS_BUCKET_ID = "product-photos";
+
 // 클라이언트 압축 없이 원본을 그대로 올리므로 여유 있게 잡는다 (서버에서 저장 전 재압축)
 export const MAX_PHOTO_SIZE_BYTES = 20 * 1024 * 1024;
 export const ALLOWED_PHOTO_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;

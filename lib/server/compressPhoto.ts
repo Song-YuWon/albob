@@ -10,7 +10,8 @@ export interface CompressedPhoto {
 // 원본(최대 20MB)을 긴 변 기준으로 축소하고 JPEG로 재인코딩해 스토리지 용량과 대역폭을 줄인다.
 // 클라이언트 압축은 실제 기기에서 크래시를 반복 유발해 포기했다 (lib/utils/imageProcessing.ts 참고) —
 // 서버는 메모리 제약이 없는 sharp(libvips)로 안전하게 처리한다.
-export async function compressProductPhoto(file: File): Promise<CompressedPhoto> {
+// Blob을 받는다 — Supabase Storage에서 방금 내려받은 원본은 File이 아니라 Blob이다.
+export async function compressProductPhoto(file: Blob): Promise<CompressedPhoto> {
   const arrayBuffer = await file.arrayBuffer();
 
   const buffer = await sharp(Buffer.from(arrayBuffer))

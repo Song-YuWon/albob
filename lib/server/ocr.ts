@@ -1,5 +1,13 @@
 import "server-only";
-import { createWorker, PSM, type Worker } from "tesseract.js";
+import path from "node:path";
+import { createWorker, OEM, PSM, type Worker } from "tesseract.js";
+
+// 배포 환경(Vercel Functions 등)은 파일시스템이 읽기 전용이라, 언어 데이터를 CDN에서
+// 받아와 캐시로 쓰려는 기본 동작이 실패한다(콘솔에 에러 로그만 남고 동작 자체는 안 깨지긴
+// 하지만, 매 콜드스타트마다 불필요한 네트워크 요청 실패가 반복된다). langPath로 배포
+// 번들에 같이 포함시킨 로컬 파일을 직접 가리키고, cacheMethod: "none"으로 캐시 읽기/쓰기
+// 시도 자체를 꺼서 그 문제를 원천적으로 없앤다.
+const LANG_PATH = path.join(process.cwd(), "lib/server/tessdata");
 
 export type OcrResult = { status: "success"; rawText: string } | { status: "failed" };
 
@@ -17,7 +25,11 @@ let workerPromise: Promise<Worker> | null = null;
 
 async function getWorker(): Promise<Worker> {
   if (!workerPromise) {
-    workerPromise = createWorker("kor")
+    workerPromise = createWorker("kor", OEM.LSTM_ONLY, {
+      langPath: LANG_PATH,
+      gzip: false,
+      cacheMethod: "none",
+    })
       .then(async (worker) => {
         await worker.setParameters({ tessedit_pageseg_mode: PSM.SPARSE_TEXT });
         return worker;
