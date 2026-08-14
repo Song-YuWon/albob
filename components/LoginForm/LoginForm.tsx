@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginInput } from "@/lib/validation/auth";
+import { fetchJson } from "@/lib/client/fetchJson";
 import { MESSAGES } from "@/lib/constants/messages";
 
 export function LoginForm() {
@@ -20,20 +21,17 @@ export function LoginForm() {
 
   const onSubmit = async (data: LoginInput) => {
     setServerError(null);
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const body = await response.json().catch(() => null);
-      setServerError(body?.message ?? MESSAGES.auth.loginFailed);
-      return;
+    try {
+      await fetchJson(
+        "/api/auth/login",
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) },
+        MESSAGES.auth.loginFailed,
+      );
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      setServerError(error instanceof Error ? error.message : MESSAGES.auth.loginFailed);
     }
-
-    router.push("/");
-    router.refresh();
   };
 
   const inputClass = (hasFieldError: boolean) =>

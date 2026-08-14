@@ -2,16 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { fetchJson } from "@/lib/client/fetchJson";
 import { MESSAGES } from "@/lib/constants/messages";
 import type { Review } from "@/lib/db/reviews";
-
-async function parseJsonOrThrow<T>(response: Response, fallbackMessage: string): Promise<T> {
-  const body = await response.json().catch(() => null);
-  if (!response.ok) {
-    throw new Error(body?.message ?? fallbackMessage);
-  }
-  return body as T;
-}
 
 export function useReviewForm(productId: string, testerId: string, initialReview: Review | null) {
   const router = useRouter();
@@ -61,23 +54,19 @@ export function useReviewForm(productId: string, testerId: string, initialReview
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      const response = review
-        ? await fetch(`/api/reviews/${review.id}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ rating, comment }),
-          })
-        : await fetch("/api/reviews", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ productId, rating, comment }),
-          });
-
       if (review) {
-        await parseJsonOrThrow(response, MESSAGES.reviewForm.submitting);
+        await fetchJson(
+          `/api/reviews/${review.id}`,
+          { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ rating, comment }) },
+          MESSAGES.reviewForm.submitFailed,
+        );
         setReview({ ...review, rating, comment });
       } else {
-        const body = await parseJsonOrThrow<{ reviewId: string }>(response, MESSAGES.reviewForm.submitting);
+        const body = await fetchJson<{ reviewId: string }>(
+          "/api/reviews",
+          { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ productId, rating, comment }) },
+          MESSAGES.reviewForm.submitFailed,
+        );
         setReview({
           id: body.reviewId,
           productId,
@@ -91,7 +80,7 @@ export function useReviewForm(productId: string, testerId: string, initialReview
       setIsEditing(false);
       router.refresh();
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : MESSAGES.reviewForm.submitting);
+      setSubmitError(error instanceof Error ? error.message : MESSAGES.reviewForm.submitFailed);
     } finally {
       setIsSubmitting(false);
     }
@@ -102,8 +91,7 @@ export function useReviewForm(productId: string, testerId: string, initialReview
     setIsDeleting(true);
     setDeleteError(null);
     try {
-      const response = await fetch(`/api/reviews/${review.id}`, { method: "DELETE" });
-      await parseJsonOrThrow(response, MESSAGES.reviewForm.deleteFailed);
+      await fetchJson(`/api/reviews/${review.id}`, { method: "DELETE" }, MESSAGES.reviewForm.deleteFailed);
       setReview(null);
       setRating(0);
       setComment("");

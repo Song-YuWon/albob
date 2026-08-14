@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { fetchJson } from "@/lib/client/fetchJson";
+import { MESSAGES } from "@/lib/constants/messages";
 import type { ProductDetail } from "@/lib/db/products";
 import type { WizardTag } from "@/components/RegisterWizard/types";
 
@@ -65,23 +67,23 @@ export function useProductEditForm(product: ProductDetail) {
     setIsSubmitting(true);
     setError(null);
     try {
-      const response = await fetch(`/api/products/${product.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          brand,
-          ingredientIds: tags.map((tag) => tag.ingredientId).filter((id): id is string => Boolean(id)),
-        }),
-      });
-      const body = await response.json().catch(() => null);
-      if (!response.ok) {
-        throw new Error(body?.message ?? "수정에 실패했어요");
-      }
+      await fetchJson(
+        `/api/products/${product.id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name,
+            brand,
+            ingredientIds: tags.map((tag) => tag.ingredientId).filter((id): id is string => Boolean(id)),
+          }),
+        },
+        MESSAGES.productEdit.submitFailed,
+      );
       router.push(`/products/${product.id}`);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "수정에 실패했어요");
+      setError(err instanceof Error ? err.message : MESSAGES.productEdit.submitFailed);
     } finally {
       setIsSubmitting(false);
     }

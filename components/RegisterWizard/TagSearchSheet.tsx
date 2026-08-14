@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { useEffect, useState } from "react";
 import {
   searchIngredientsApi,
   requestIngredientApi,
   type IngredientSearchResultItem,
 } from "@/lib/client/registrationApi";
+import { ErrorState } from "@/components/ErrorState/ErrorState";
 import { MESSAGES } from "@/lib/constants/messages";
+import { useDismissOnBackNavigation } from "./useDismissOnBackNavigation";
+import { useSheetDragDismiss } from "./useSheetDragDismiss";
 
 interface TagSearchSheetProps {
   initialQuery: string;
@@ -17,116 +20,73 @@ interface TagSearchSheetProps {
   onDelete?: () => void;
 }
 
-// 핸들을 이만큼 아래로 끌면 닫힘으로 처리한다
-const DISMISS_DRAG_THRESHOLD_PX = 100;
-
 export function TagSearchSheet({ initialQuery, onSelect, onRequestNew, onClose, onDelete }: TagSearchSheetProps) {
   const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState<IngredientSearchResultItem[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState(false);
   const [isRequesting, setIsRequesting] = useState(false);
+  const [requestError, setRequestError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
-  const [dragY, setDragY] = useState(0);
-  const dragStartYRef = useRef<number | null>(null);
-  // 뒤로가기로 닫힐 때는 popstate가 이미 히스토리를 되돌린 상태라 정리(history.back())가
-  // 필요 없다 — 그 외(바깥 클릭, 항목 선택, 드래그 닫기 등)로 닫힐 때만 우리가 쌓아둔
-  // 더미 엔트리를 되돌려줘야 뒤로가기를 두 번 눌러야 하는 상황을 막을 수 있다.
-  const closedViaPopStateRef = useRef(false);
-  // 개발 모드 StrictMode는 effect를 마운트→클린업→재마운트로 두 번 실행한다. 클린업에서
-  // 곧바로 history.back()을 부르면 그 결과 popstate가 비동기로 발생해 재마운트 시점의
-  // 리스너를 오작동시켜 시트가 열리자마자 닫혀버린다. 그래서 클린업은 history.back()을
-  // 다음 틱으로 미뤄두고, 재마운트가 그 예약을 취소하는 방식으로 "진짜 언마운트"만 반영한다.
-  const pendingHistoryBackRef = useRef<number | null>(null);
+
+  useDismissOnBackNavigation(onClose);
+  const { dragY, handleDragStart, handleDragMove, handleDragEnd } = useSheetDragDismiss(onClose);
 
   const trimmedQuery = query.trim();
   // 부분/유사 일치 검색이라 결과가 있어도 사용자가 찾는 정확한 성분이 없을 수 있다 —
   // 그럴 때도 추가 요청을 할 수 있어야 한다 (결과가 0건일 때만 요청 버튼을 보여주면
   // "쌀 단백질" 검색 시 "쌀", "단세포단백질"만 나오고 요청할 방법이 없어지는 문제가 생김).
   const hasExactMatch = results.some((item) => item.name.toLowerCase() === trimmedQuery.toLowerCase());
-  const showRequestButton = !isSearching && trimmedQuery.length > 0 && hasSearched && !hasExactMatch;
+  const showRequestButton = !isSearching && !searchError && trimmedQuery.length > 0 && hasSearched && !hasExactMatch;
 
-  // 안드로이드 뒤로가기(제스처/버튼)를 누르면 이전 화면으로 가지 않고 시트만 닫히게 —
-  // 시트가 열릴 때 더미 히스토리를 하나 쌓아두고, 그걸 pop하는 뒤로가기를 가로채서 닫기만 한다.
-  useEffect(() => {
-    if (pendingHistoryBackRef.current !== null) {
-      window.clearTimeout(pendingHistoryBackRef.current);
-      pendingHistoryBackRef.current = null;
-    } else {
-      window.history.pushState({ tagSearchSheet: true }, "");
+  // cancelledRef: 입력이 바뀌어 새 디바운스 사이클이 시작되면 이전 요청의 결과가 뒤늦게
+  // 와도 화면에 반영하지 않는다. 재시도 버튼은 그 자리에서 바로 실행하는 별도 호출이라
+  // 디바운스를 거치지 않는다.
+  const runSearch = async (searchQuery: string, cancelledRef: { current: boolean }) => {
+    setIsSearching(true);
+    setSearchError(false);
+    try {
+      const items = await searchIngredientsApi(searchQuery);
+      if (cancelledRef.current) return;
+      setResults(items);
+      setHasSearched(true);
+    } catch {
+      if (!cancelledRef.current) setSearchError(true);
+    } finally {
+      if (!cancelledRef.current) setIsSearching(false);
     }
-
-    const handlePopState = () => {
-      closedViaPopStateRef.current = true;
-      onClose();
-    };
-    window.addEventListener("popstate", handlePopState);
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-      if (!closedViaPopStateRef.current) {
-        pendingHistoryBackRef.current = window.setTimeout(() => {
-          pendingHistoryBackRef.current = null;
-          window.history.back();
-        }, 0);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  };
 
   useEffect(() => {
     if (!trimmedQuery) return;
 
-    let cancelled = false;
+    const cancelledRef = { current: false };
     const timer = setTimeout(() => {
-      setIsSearching(true);
-      searchIngredientsApi(trimmedQuery)
-        .then((items) => {
-          if (cancelled) return;
-          setResults(items);
-          setHasSearched(true);
-        })
-        .finally(() => {
-          if (!cancelled) setIsSearching(false);
-        });
+      runSearch(trimmedQuery, cancelledRef);
     }, 300);
 
     return () => {
-      cancelled = true;
+      cancelledRef.current = true;
       clearTimeout(timer);
     };
   }, [trimmedQuery]);
 
+  const handleRetrySearch = () => {
+    runSearch(trimmedQuery, { current: false });
+  };
+
   const handleRequestNew = async () => {
     if (!trimmedQuery) return;
     setIsRequesting(true);
+    setRequestError(null);
     try {
       const ingredient = await requestIngredientApi(trimmedQuery);
       onRequestNew(ingredient);
+    } catch (error) {
+      setRequestError(error instanceof Error ? error.message : MESSAGES.error.title);
     } finally {
       setIsRequesting(false);
     }
-  };
-
-  // 아래로 끌어서 닫는 제스처 — 상단 고정 영역(핸들+제목+검색창 주변) 전체에서 동작한다.
-  // 검색창 입력 자체는 텍스트 커서 조작과 충돌하니 그 위에서 시작한 터치는 드래그로 취급하지 않는다.
-  // 터치 전용 Touch Events 대신 마우스에서도 동일하게 동작하는 Pointer Events를 쓴다.
-  const handleDragStart = (event: PointerEvent) => {
-    if ((event.target as HTMLElement).closest("input")) return;
-    event.currentTarget.setPointerCapture(event.pointerId);
-    dragStartYRef.current = event.clientY;
-  };
-  const handleDragMove = (event: PointerEvent) => {
-    if (dragStartYRef.current === null) return;
-    const delta = event.clientY - dragStartYRef.current;
-    if (delta > 0) setDragY(delta);
-  };
-  const handleDragEnd = () => {
-    if (dragStartYRef.current === null) return;
-    if (dragY > DISMISS_DRAG_THRESHOLD_PX) {
-      onClose();
-      return;
-    }
-    setDragY(0);
-    dragStartYRef.current = null;
   };
 
   return (
@@ -163,14 +123,16 @@ export function TagSearchSheet({ initialQuery, onSelect, onRequestNew, onClose, 
         <div className="min-h-0 flex-1 overflow-y-auto px-6">
           {isSearching && <p className="py-4 text-center font-body text-xs text-ink-soft">검색 중...</p>}
 
-          {!isSearching && trimmedQuery && hasSearched && results.length === 0 && (
+          {!isSearching && searchError && <ErrorState onRetry={handleRetrySearch} />}
+
+          {!isSearching && !searchError && trimmedQuery && hasSearched && results.length === 0 && (
             <div className="flex flex-col items-center gap-3 py-6 text-center">
               <p className="font-body text-sm text-ink">{MESSAGES.tagSearch.noResultsTitle}</p>
               <p className="font-body text-xs text-ink-soft">{MESSAGES.tagSearch.noResultsHint}</p>
             </div>
           )}
 
-          {!isSearching && trimmedQuery && results.length > 0 && (
+          {!isSearching && !searchError && trimmedQuery && results.length > 0 && (
             <ul className="flex flex-col">
               {results.map((item) => (
                 <li key={item.id}>
@@ -196,14 +158,19 @@ export function TagSearchSheet({ initialQuery, onSelect, onRequestNew, onClose, 
         {(showRequestButton || onDelete) && (
           <div className="shrink-0 border-t border-line px-6 pt-3 pb-6">
             {showRequestButton && (
-              <button
-                type="button"
-                onClick={handleRequestNew}
-                disabled={isRequesting}
-                className="w-full rounded-2xl border-[1.5px] border-dashed border-primary px-4 py-3 font-body text-xs font-bold text-primary disabled:opacity-60"
-              >
-                {isRequesting ? "요청하는 중..." : MESSAGES.tagSearch.requestButton(trimmedQuery)}
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={handleRequestNew}
+                  disabled={isRequesting}
+                  className="w-full rounded-2xl border-[1.5px] border-dashed border-primary px-4 py-3 font-body text-xs font-bold text-primary disabled:opacity-60"
+                >
+                  {isRequesting ? "요청하는 중..." : MESSAGES.tagSearch.requestButton(trimmedQuery)}
+                </button>
+                {requestError && (
+                  <p className="mt-2 text-center font-body text-[11.5px] text-danger">{requestError}</p>
+                )}
+              </>
             )}
             {onDelete && (
               <button

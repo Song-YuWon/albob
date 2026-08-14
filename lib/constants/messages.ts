@@ -1,4 +1,9 @@
 export const MESSAGES = {
+  error: {
+    title: "일시적인 오류가 발생했어요",
+    hint: "네트워크 상태를 확인하고 다시 시도해주세요",
+    retryButton: "다시 시도",
+  },
   auth: {
     idRequired: "아이디를 입력해주세요",
     passwordRequired: "비밀번호를 입력해주세요",
@@ -73,6 +78,7 @@ export const MESSAGES = {
     lastEdited: (date: string, id: string) => `마지막 수정: ${date} · ${id}`,
     submitButton: "수정 완료",
     submitting: "수정하는 중...",
+    submitFailed: "수정에 실패했어요",
   },
   reviewsPage: {
     title: (count: number) => `리뷰 ${count}개`,
@@ -100,6 +106,7 @@ export const MESSAGES = {
     deleteConfirmPrompt: "정말 삭제할까요?",
     deleteConfirmButton: "삭제할게요",
     cancelButton: "취소",
+    submitFailed: "리뷰 등록에 실패했어요",
     deleteFailed: "삭제에 실패했어요",
   },
   tagSearch: {

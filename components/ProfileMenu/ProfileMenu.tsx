@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { MESSAGES } from "@/lib/constants/messages";
 
 interface ProfileMenuProps {
   testerId: string;
@@ -9,6 +10,8 @@ interface ProfileMenuProps {
 
 export function ProfileMenu({ testerId }: ProfileMenuProps) {
   const [open, setOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -23,9 +26,17 @@ export function ProfileMenu({ testerId }: ProfileMenuProps) {
   }, []);
 
   const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
-    router.refresh();
+    setIsLoggingOut(true);
+    setLogoutError(null);
+    try {
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+      if (!response.ok) throw new Error();
+      router.push("/login");
+      router.refresh();
+    } catch {
+      setLogoutError(MESSAGES.error.title);
+      setIsLoggingOut(false);
+    }
   };
 
   return (
@@ -51,10 +62,14 @@ export function ProfileMenu({ testerId }: ProfileMenuProps) {
           <button
             type="button"
             onClick={handleLogout}
-            className="block w-full px-3 py-2.5 text-left font-body text-xs font-bold text-danger"
+            disabled={isLoggingOut}
+            className="block w-full px-3 py-2.5 text-left font-body text-xs font-bold text-danger disabled:opacity-60"
           >
-            로그아웃
+            {isLoggingOut ? "로그아웃하는 중..." : "로그아웃"}
           </button>
+          {logoutError && (
+            <p className="px-3 pb-2.5 font-body text-[10.5px] text-danger">{logoutError}</p>
+          )}
         </div>
       )}
     </div>
