@@ -35,7 +35,9 @@ export function useProductEditForm(product: ProductDetail) {
 
   const handleTagClick = (tagKey: string) => {
     const tag = tags.find((t) => t.key === tagKey);
-    setSearchTarget({ tagKey, initialQuery: tag?.rawText ?? "" });
+    // 한 번이라도 성분이 확정됐으면 그 이름을 채워야 한다 — rawText는 원문 그대로라
+    // 수정 후 다시 열면 예전 값이 나타나는 문제가 있었다 (TagChip 라벨 표시와 같은 우선순위)
+    setSearchTarget({ tagKey, initialQuery: tag?.ingredientName ?? tag?.rawText ?? "" });
   };
 
   const handleAddTag = () => setSearchTarget({ tagKey: null, initialQuery: "" });
