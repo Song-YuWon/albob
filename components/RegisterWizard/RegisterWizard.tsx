@@ -93,6 +93,7 @@ export function RegisterWizard({ initialName, testerId }: RegisterWizardProps) {
           onSelect={(ingredient) => wizard.applyTagResult(ingredient, "matched")}
           onRequestNew={(ingredient) => wizard.applyTagResult(ingredient, "requested")}
           onClose={() => wizard.setSearchTarget(null)}
+          onDelete={wizard.searchTarget.tagKey ? wizard.handleDeleteTag : undefined}
         />
       )}
     </div>

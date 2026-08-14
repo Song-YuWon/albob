@@ -26,12 +26,14 @@ export function InfoStep({
   return (
     <div className="flex flex-1 flex-col gap-4 px-6 py-4">
       <input
+        autoComplete="off"
         value={name}
         onChange={(event) => onNameChange(event.target.value)}
         placeholder={MESSAGES.registration.productNamePlaceholder}
         className="w-full rounded-2xl border-[1.5px] border-line bg-surface px-4 py-4 font-body text-sm text-ink focus:outline-none"
       />
       <input
+        autoComplete="off"
         value={brand}
         onChange={(event) => onBrandChange(event.target.value)}
         placeholder={MESSAGES.registration.brandPlaceholder}

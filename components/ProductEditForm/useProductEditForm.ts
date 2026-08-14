@@ -38,6 +38,12 @@ export function useProductEditForm(product: ProductDetail) {
 
   const handleAddTag = () => setSearchTarget({ tagKey: null, initialQuery: "" });
 
+  const handleDeleteTag = () => {
+    if (!searchTarget?.tagKey) return;
+    setTags((prev) => prev.filter((tag) => tag.key !== searchTarget.tagKey));
+    setSearchTarget(null);
+  };
+
   const applyTagResult = (ingredient: { id: string; name: string }, status: "matched" | "requested") => {
     setTags((prev) => {
       if (searchTarget?.tagKey) {
@@ -93,6 +99,7 @@ export function useProductEditForm(product: ProductDetail) {
     error,
     handleTagClick,
     handleAddTag,
+    handleDeleteTag,
     applyTagResult,
     handleSubmit,
   };

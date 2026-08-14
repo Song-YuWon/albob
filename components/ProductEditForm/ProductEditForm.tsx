@@ -22,12 +22,14 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
       </div>
 
       <input
+        autoComplete="off"
         value={form.name}
         onChange={(event) => form.setName(event.target.value)}
         placeholder={MESSAGES.registration.productNamePlaceholder}
         className="w-full rounded-2xl border-[1.5px] border-line bg-surface px-4 py-4 font-body text-sm text-ink focus:outline-none"
       />
       <input
+        autoComplete="off"
         value={form.brand}
         onChange={(event) => form.setBrand(event.target.value)}
         placeholder={MESSAGES.registration.brandPlaceholder}
@@ -72,6 +74,7 @@ export function ProductEditForm({ product }: ProductEditFormProps) {
           onSelect={(ingredient) => form.applyTagResult(ingredient, "matched")}
           onRequestNew={(ingredient) => form.applyTagResult(ingredient, "requested")}
           onClose={() => form.setSearchTarget(null)}
+          onDelete={form.searchTarget.tagKey ? form.handleDeleteTag : undefined}
         />
       )}
     </div>

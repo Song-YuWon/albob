@@ -111,5 +111,6 @@ export const MESSAGES = {
     requestButton: (query: string) => `"${query}" 성분 추가 요청하기`,
     requestedToast: "검토 후 목록에 추가될 예정이에요",
     pendingBadge: "검토중",
+    deleteButton: "이 태그 삭제하기",
   },
 } as const;
